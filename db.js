@@ -100,6 +100,10 @@ module.exports = function() {
         return modelName.toLowerCase();
     };
 
+    Db.prototype.getConstructor = function(modelName) {
+        return this._models[modelName];
+    }
+
     Db.prototype.deleteAll = function(modelName) {
         this._db.collection(this.getCollectionName(modelName)).drop();
     }
