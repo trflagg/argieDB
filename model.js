@@ -19,5 +19,10 @@ module.exports = function(db) {
         return doc;
     }
 
+    Model.prototype.id = function() {
+        return this._id;
+    }
+
+    db.register('Model', Model);
     return Model;
 }
