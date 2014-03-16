@@ -1,0 +1,24 @@
+{
+  "name": "argieDB",
+  "version": "0.1.0",
+  "description": "A really simple Node.js and Mongodb model system.",
+  "main": "db.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trflagg/argieDB.git"
+  },
+  "keywords": [
+    "nodejs",
+    "node",
+    "mongodb",
+    "mongo"
+  ],
+  "author": "Taylor Flagg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/trflagg/argieDB/issues"
+  }
+}
