@@ -16,6 +16,8 @@ module.exports = function(db) {
     Model.prototype.onSave = function(model) {
         var doc = {};
 
+        this.validate();
+
         doc._id = model._id;
         model.saveToDoc.call(model, doc);
 
@@ -27,11 +29,16 @@ module.exports = function(db) {
     };
 
     Model.prototype.initialize = function() {
-        
+
     };
 
-    Model.prototype.saveToDoc = function(doc) { 
+    Model.prototype.saveToDoc = function(doc) {
 
+    };
+
+    Model.prototype.validate = function() {
+        // if invalid:
+        // throw 'Reason why'
     };
 
     Model.prototype.id = function() {
