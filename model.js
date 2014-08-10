@@ -16,7 +16,7 @@ module.exports = function(db) {
     Model.prototype.onSave = function(model) {
         var doc = {};
 
-        this.validate();
+        model.validate.call(model);
 
         doc._id = model._id;
         model.saveToDoc.call(model, doc);
