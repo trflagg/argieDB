@@ -13,7 +13,7 @@ module.exports = function() {
     Db.prototype.close = function() {
         this._db.close();
     }
-    
+
     Db.prototype.register = function(modelName, constructor) {
         this._models[modelName] = constructor;
     };
@@ -29,7 +29,7 @@ module.exports = function() {
                 model = this._models[modelName].prototype.onSave(model);
             } catch(e) {
                 if (callback) {
-                    return callback(e.toString(), null);
+                    return callback(e, null);
                 }
                 else {
                     throw e;
@@ -66,7 +66,7 @@ module.exports = function() {
             try {
                 var model = new db._models[modelName](result);
             } catch(e) {
-                return callback(e.toString(), null);
+                return callback(e, null);
             }
             return callback(null, model);
         });
@@ -77,7 +77,7 @@ module.exports = function() {
         var db = this;
 
         // load from db
-        
+
         this._db.collection(this.getCollectionName(modelName)).find(condition).toArray(function(err, results) {
             if (err) {
                 return callback(err, null);
@@ -89,7 +89,7 @@ module.exports = function() {
                     objects.push(new db._models[modelName](results[i]));
                 }
             } catch(e) {
-                return callback(e.toString(), null);
+                return callback(e, null);
             }
 
             return callback(null, objects);
