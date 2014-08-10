@@ -62,8 +62,12 @@ module.exports = function() {
         this._db.collection(this.getCollectionName(modelName)).findOne(condition, function(error, result) {
             if (error) {
                 return callback(error, null);
+            } else if (result == null) {
+                var error = new Error(modelName + ' matching ' + JSON.stringify(condition) + ' not found.');
+                error.name = "NotFoundError";
+                return callback(error, null);
             }
-            try {
+            else try {
                 var model = new db._models[modelName](result);
             } catch(e) {
                 return callback(e, null);
