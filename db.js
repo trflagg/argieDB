@@ -54,12 +54,20 @@ module.exports = function() {
         }
     };
 
-    Db.prototype.load = function(modelName, condition, callback) {
+    Db.prototype.load = function(modelName, condition, projection, callback) {
         // callback variable
         var db = this;
 
+        // no projection supplied
+        if (typeof(projection) === 'function') {
+            callback = projection;
+            projection = {};
+        }
+
         // load from db
-        this._db.collection(this.getCollectionName(modelName)).findOne(condition, function(error, result) {
+        this._db
+        .collection(this.getCollectionName(modelName))
+        .findOne(condition, projection, function(error, result) {
             if (error) {
                 return callback(error, null);
             } else if (result == null) {
@@ -76,13 +84,21 @@ module.exports = function() {
         });
     };
 
-    Db.prototype.loadMultiple = function(modelName, condition, callback) {
+    Db.prototype.loadMultiple = function(modelName, condition, projection, callback) {
         // callback variable
         var db = this;
 
-        // load from db
+        // no projection supplied
+        if (typeof(projection) === 'function') {
+            callback = projection;
+            projection = {};
+        }
 
-        this._db.collection(this.getCollectionName(modelName)).find(condition).toArray(function(err, results) {
+        // load from db
+        this._db
+        .collection(this.getCollectionName(modelName))
+        .find(condition, projection)
+        .toArray(function(err, results) {
             if (err) {
                 return callback(err, null);
             }
