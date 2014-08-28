@@ -12,6 +12,7 @@ module.exports = function() {
     coDb.prototype.save = thunkify(Db.prototype.save);
     coDb.prototype.load = thunkify(Db.prototype.load);
     coDb.prototype.loadMultiple = thunkify(Db.prototype.loadMultiple);
+    coDb.prototype.remove = thunkify(Db.prototype.remove);
 
     return coDb;
 }()

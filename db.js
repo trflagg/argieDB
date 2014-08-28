@@ -124,6 +124,11 @@ module.exports = function() {
         return this._models[modelName];
     }
 
+    Db.prototype.remove = function(modelName, condition, callback) {
+        this._db.collection(this.getCollectionName(modelName))
+            .remove(condition, callback);
+    }
+
     Db.prototype.deleteAll = function(modelName) {
         this._db.collection(this.getCollectionName(modelName)).drop();
     }
