@@ -27,7 +27,10 @@ co(function *() {
 
         assert(foundModel.id().equals(objId));
 
-        // Step 7 - close db
+        // Step 7 - remove object
+        yield db.removeById('Model', String(objId));
+
+        // Step 8 - close db
         db.close();
     } catch(e) {
         console.log('****Exception: ' + e);

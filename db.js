@@ -125,6 +125,18 @@ module.exports = function() {
     }
 
     Db.prototype.remove = function(modelName, condition, callback) {
+        this._remove(modelName, condition, callback);
+    }
+
+    // could use mongoskin's collection.removeById()
+    // but I like all of my code to go through the same place.
+    Db.prototype.removeById = function(modelName, id, callback) {
+        this._remove(modelName, {_id: new ObjectID(id)}, callback);
+    };
+
+    // co-db overwrites Db.prototype.remove so I need a separate method
+    // for removeById() to call that doesn't get overwritten.
+    Db.prototype._remove = function(modelName, condition, callback) {
         this._db.collection(this.getCollectionName(modelName))
             .remove(condition, callback);
     }

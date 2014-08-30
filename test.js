@@ -22,14 +22,20 @@ db.save('Model', newModel, function(err) {
 		console.log('error: ' + err);
 	}
 
-	// Step 6 - Look up object 
+	// Step 6 - Look up object
 	db.load('Model', {'_id': objId}, function(err, foundModel) {
 		if (err !== null) {
 			console.log('error: ' + err);
 		}
 		assert(foundModel.id().equals(objId));
 
-		// Step 7 - close db
-		db.close();
-	})
+		// Step 7 - Remove object
+		db.removeById('Model', String(objId), function(err) {
+			if (err !== null) {
+				console.log('error: ' + err);
+			}
+			// Step 8 - close db
+			db.close();
+		});
+	});
 });

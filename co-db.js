@@ -13,6 +13,7 @@ module.exports = function() {
     coDb.prototype.load = thunkify(Db.prototype.load);
     coDb.prototype.loadMultiple = thunkify(Db.prototype.loadMultiple);
     coDb.prototype.remove = thunkify(Db.prototype.remove);
+    coDb.prototype.removeById = thunkify(Db.prototype.removeById);
 
     return coDb;
 }()
