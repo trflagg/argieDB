@@ -26,5 +26,9 @@
     "mongodb": "^1.4.8",
     "mongoskin": "^1.4.4",
     "thunkify": "^2.1.2"
+  },
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "mocha": "^1.21.4",
   }
 }
