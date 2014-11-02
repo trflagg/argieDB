@@ -7,6 +7,8 @@ module.exports = function() {
     Db = function(environment) {
         this._environment = environment;
         this._db = mongo.db(environment.db.URL, {safe: true});
+        // hide username:password in Mongo URL
+        console.log('connecting to ' + environment.db.URL.replace(/:\/\/.*:(.*)@/, 'XXXXXXX'));
         this._models = {};
     };
 
