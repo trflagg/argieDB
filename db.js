@@ -6,7 +6,7 @@ module.exports = function() {
 
     Db = function(environment) {
         this._environment = environment;
-        this._db = mongo.db(environment.db.URL, {safe: true});
+        this._db = mongo.db(environment.db.URL);
 
         if (!environment ||
             !environment.db ||
