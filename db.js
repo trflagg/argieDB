@@ -39,7 +39,15 @@ module.exports = (function() {
         return newModel;
     };
 
+    Db.prototype.checkConnection = async function() {
+      if (!this._db) {
+        await this.connect();
+      }
+    };
+
     Db.prototype.save = async function(modelName, model) {
+        await this.checkConnection();
+
         if (this._models[modelName].prototype.onSave) {
             try {
                 model = this._models[modelName].prototype.onSave(model);
@@ -50,7 +58,7 @@ module.exports = (function() {
 
         // save to db
       try {
-        await this._db.collection(this.getCollectionName(modelName)).insert(
+        await this._db.collection(this.getCollectionName(modelName)).save(
             model,
         );
       } catch (e) {
@@ -59,6 +67,8 @@ module.exports = (function() {
     };
 
     Db.prototype.load = async function(modelName, condition, projection) {
+        await this.checkConnection();
+
         // callback variable
         var db = this;
 
@@ -77,7 +87,7 @@ module.exports = (function() {
           if (!result) {
             var error = new Error(modelName + ' matching ' + JSON.stringify(condition) + ' not found.');
             error.name = "NotFoundError";
-            throw err;
+            throw error;
           }
 
           var model = new db._models[modelName](result);
@@ -88,6 +98,8 @@ module.exports = (function() {
     };
 
     Db.prototype.loadMultiple = async function(modelName, condition, projection) {
+        await this.checkConnection();
+
         // callback variable
         var db = this;
 
@@ -135,11 +147,15 @@ module.exports = (function() {
     // co-db overwrites Db.prototype.remove so I need a separate method
     // for removeById() to call that doesn't get overwritten.
     Db.prototype._remove = async function(modelName, condition) {
+        await this.checkConnection();
+
         await this._db.collection(this.getCollectionName(modelName))
             .remove(condition);
     }
 
     Db.prototype.deleteAll = async function(modelName) {
+        await this.checkConnection();
+
         await this._db.collection(this.getCollectionName(modelName)).drop();
     }
 

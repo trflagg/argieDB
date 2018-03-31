@@ -30,7 +30,6 @@ module.exports = function() {
     }
     util.inherits(coDb, Db);
 
-    coDb.prototype.connect = myThunk(Db.prototype.connect);
     coDb.prototype.save = myThunk(Db.prototype.save);
     coDb.prototype.load = myThunk(Db.prototype.load);
     coDb.prototype.loadMultiple = myThunk(Db.prototype.loadMultiple);
