@@ -1,25 +1,33 @@
-var mongo = require('mongoskin'),
-    ObjectID = require('mongodb').ObjectID;
+var MongoClient = require('mongodb').MongoClient,
+  ObjectID = require('mongodb').ObjectID;
 
 
-module.exports = function() {
-
+module.exports = (function() {
     Db = function(environment) {
-        this._environment = environment;
-        this._db = mongo.db(environment.db.URL);
-
+        //this._db = mongo.db(environment.db.URL);
         if (!environment ||
             !environment.db ||
             !environment.db.URL) {
             throw "Problem with db environment"
         }
-        // hide username:password in Mongo URL
-        console.log('connecting to ' + environment.db.URL.replace(/:\/\/.*:(.*)@/, 'XXXXXXX'));
+        this._environment = environment;
         this._models = {};
+    }
+
+    Db.prototype.connect = async function() {
+        try {
+          const environment = this._environment;
+          this._client = await MongoClient.connect(environment.db.URL);
+          this._db = this._client.db('mis');
+          // hide username:password in Mongo URL
+          console.log('connecting to ' + environment.db.URL.replace(/:\/\/.*:(.*)@/, 'XXXXXXX'));
+        } catch (err) {
+          throw err;
+        }
     };
 
-    Db.prototype.close = function() {
-        this._db.close();
+    Db.prototype.close = async function() {
+        await this._client.close();
     }
 
     Db.prototype.register = function(modelName, constructor) {
@@ -31,7 +39,7 @@ module.exports = function() {
         return newModel;
     };
 
-    Db.prototype.save = function(modelName, model, callback) {
+    Db.prototype.save = async function(modelName, model) {
         if (this._models[modelName].prototype.onSave) {
             try {
                 model = this._models[modelName].prototype.onSave(model);
@@ -45,24 +53,14 @@ module.exports = function() {
             }
         }
 
-        if (callback) {
-            // save to db
-            this._db.collection(this.getCollectionName(modelName)).save(
-                model,
-                {upsert: true},
-                callback
-            );
-        }
-        else {
-            // save to db
-            this._db.collection(this.getCollectionName(modelName)).save(
-                model,
-                {upsert: true, w:0}
-            );
-        }
+        // save to db
+        await this._db.collection(this.getCollectionName(modelName)).save(
+            model,
+            {upsert: true}
+        );
     };
 
-    Db.prototype.load = function(modelName, condition, projection, callback) {
+    Db.prototype.load = async function(modelName, condition, projection) {
         // callback variable
         var db = this;
 
@@ -73,26 +71,25 @@ module.exports = function() {
         }
 
         // load from db
-        this._db
-        .collection(this.getCollectionName(modelName))
-        .findOne(condition, projection, function(error, result) {
-            if (error) {
-                return callback(error, null);
-            } else if (result == null) {
-                var error = new Error(modelName + ' matching ' + JSON.stringify(condition) + ' not found.');
-                error.name = "NotFoundError";
-                return callback(error, null);
-            }
-            else try {
-                var model = new db._models[modelName](result);
-            } catch(e) {
-                return callback(e, null);
-            }
-            return callback(null, model);
-        });
+        try {
+          const result = await this._db
+          .collection(this.getCollectionName(modelName))
+          .findOne(condition, projection);
+
+          if (!result) {
+            var error = new Error(modelName + ' matching ' + JSON.stringify(condition) + ' not found.');
+            error.name = "NotFoundError";
+            throw err;
+          }
+
+          var model = new db._models[modelName](result);
+          return model;
+        } catch (err) {
+          throw err;
+        }
     };
 
-    Db.prototype.loadMultiple = function(modelName, condition, projection, callback) {
+    Db.prototype.loadMultiple = async function(modelName, condition, projection) {
         // callback variable
         var db = this;
 
@@ -103,25 +100,20 @@ module.exports = function() {
         }
 
         // load from db
-        this._db
-        .collection(this.getCollectionName(modelName))
-        .find(condition, projection)
-        .toArray(function(err, results) {
-            if (err) {
-                return callback(err, null);
-            }
-            var objects = [];
+        try {
+          const results = await this._db
+          .collection(this.getCollectionName(modelName))
+          .find(condition, projection)
+          .toArray();
 
-            try {
-                for (var i=0, ll=results.length; i<ll; i++) {
-                    objects.push(new db._models[modelName](results[i]));
-                }
-            } catch(e) {
-                return callback(e, null);
-            }
-
-            return callback(null, objects);
-        });
+          var objects = [];
+          for (var i=0, ll=results.length; i<ll; i++) {
+              objects.push(new db._models[modelName](results[i]));
+          }
+          return objects;
+        } catch (e) {
+          throw e;
+        }
     };
 
     Db.prototype.getCollectionName = function(modelName) {
@@ -132,26 +124,26 @@ module.exports = function() {
         return this._models[modelName];
     }
 
-    Db.prototype.remove = function(modelName, condition, callback) {
-        this._remove(modelName, condition, callback);
+    Db.prototype.remove = async function(modelName, condition) {
+        await this._remove(modelName, condition);
     }
 
     // could use mongoskin's collection.removeById()
     // but I like all of my code to go through the same place.
-    Db.prototype.removeById = function(modelName, id, callback) {
-        this._remove(modelName, {_id: new ObjectID(id)}, callback);
+    Db.prototype.removeById = async function(modelName, id) {
+        await this._remove(modelName, {_id: new ObjectID(id)});
     };
 
     // co-db overwrites Db.prototype.remove so I need a separate method
     // for removeById() to call that doesn't get overwritten.
-    Db.prototype._remove = function(modelName, condition, callback) {
-        this._db.collection(this.getCollectionName(modelName))
-            .remove(condition, callback);
+    Db.prototype._remove = async function(modelName, condition) {
+        await this._db.collection(this.getCollectionName(modelName))
+            .remove(condition);
     }
 
-    Db.prototype.deleteAll = function(modelName) {
-        this._db.collection(this.getCollectionName(modelName)).drop();
+    Db.prototype.deleteAll = async function(modelName) {
+        await this._db.collection(this.getCollectionName(modelName)).drop();
     }
 
     return Db;
-}()
+})()
