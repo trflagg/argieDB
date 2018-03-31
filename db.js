@@ -44,20 +44,18 @@ module.exports = (function() {
             try {
                 model = this._models[modelName].prototype.onSave(model);
             } catch(e) {
-                if (callback) {
-                    return callback(e, null);
-                }
-                else {
-                    throw e;
-                }
+                throw e;
             }
         }
 
         // save to db
-        await this._db.collection(this.getCollectionName(modelName)).save(
+      try {
+        await this._db.collection(this.getCollectionName(modelName)).insert(
             model,
-            {upsert: true}
         );
+      } catch (e) {
+        throw e;
+      }
     };
 
     Db.prototype.load = async function(modelName, condition, projection) {

@@ -36,6 +36,10 @@ try {
   var id1 = model1.id();
   var id2 = model2.id();
 
+  await db.save('Model', model1);
+  await db.save('Model', model2);
+
+
   const foundModels = await db.loadMultiple('Model', {});
   assert(foundModels.length > 1);
 
