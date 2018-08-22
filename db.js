@@ -17,8 +17,9 @@ module.exports = (function() {
     Db.prototype.connect = async function() {
         try {
           const environment = this._environment;
+          const dbName = environment.db.name || 'mis';
           this._client = await MongoClient.connect(environment.db.URL);
-          this._db = this._client.db('mis');
+          this._db = this._client.db(dbName);
           // hide username:password in Mongo URL
           console.log('connecting to ' + environment.db.URL.replace(/:\/\/.*:(.*)@/, 'XXXXXXX'));
         } catch (err) {
