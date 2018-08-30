@@ -160,5 +160,11 @@ module.exports = (function() {
         await this._db.collection(this.getCollectionName(modelName)).drop();
     }
 
+    Db.prototype.createIndex = async function(modelName, index, options) {
+      await this.checkConnection();
+
+      this._db.collection(this.getCollectionName(modelName)).createIndex(index, options);
+    }
+
     return Db;
 })()
